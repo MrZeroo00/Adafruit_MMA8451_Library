@@ -117,8 +117,8 @@ bool Adafruit_MMA8451::begin(uint8_t i2caddr) {
 
   // enable 4G range
   writeRegister8(MMA8451_REG_XYZ_DATA_CFG, MMA8451_RANGE_4_G);
-  // High res
-  writeRegister8(MMA8451_REG_CTRL_REG2, 0x02);
+  // Normal mode
+  writeRegister8(MMA8451_REG_CTRL_REG2, 0x00);
   // DRDY on INT1
   writeRegister8(MMA8451_REG_CTRL_REG4, 0x01);
   writeRegister8(MMA8451_REG_CTRL_REG5, 0x01);
@@ -221,6 +221,43 @@ void Adafruit_MMA8451::setDataRate(mma8451_dataRate_t dataRate)
 mma8451_dataRate_t Adafruit_MMA8451::getDataRate(void)
 {
   return (mma8451_dataRate_t)((readRegister8(MMA8451_REG_CTRL_REG1) >> 3) & MMA8451_DATARATE_MASK);
+}
+
+/**************************************************************************/
+/*!
+    @brief  Configures pulse detection
+    For more info check out this app note: http://cache.freescale.com/files/sensors/doc/app_note/AN4072.pdf
+*/
+/**************************************************************************/
+void Adafruit_MMA8451::cfgPulseDetection(void)
+{
+  /* Deactivate */
+  uint8_t ctl1 = readRegister8(MMA8451_REG_CTRL_REG1);
+  writeRegister8(MMA8451_REG_CTRL_REG1, ctl1 & ~0x1);
+  /* Enable single/double taps on all axes */
+  writeRegister8(MMA8451_REG_PULSE_CFG, 0x55);
+  /* Set Threshold 1.575g on X and 2.65g on Z */
+  writeRegister8(MMA8451_REG_PULSE_THSX, 0x19);
+  writeRegister8(MMA8451_REG_PULSE_THSY, 0x19);
+  writeRegister8(MMA8451_REG_PULSE_THSZ, 0x2A);
+  /* Set Time Limit for Tap Detection to 50 ms, Normal Mode, No LPF  */
+  writeRegister8(MMA8451_REG_PULSE_TMLT, 0x50);
+  /* Set Latency Time to 300 ms  */
+  writeRegister8(MMA8451_REG_PULSE_LTCY, 0xA0);
+  /* Pulse Time Window at max. (dependent of Data Rate, Low-pass filter and power mode)  */
+  writeRegister8(MMA8451_REG_PULSE_WIND, 0xFF);
+  /* Activate */
+  ctl1 = readRegister8(MMA8451_REG_CTRL_REG1);
+  writeRegister8(MMA8451_REG_CTRL_REG1, ctl1 | 0x1);
+}
+
+/**************************************************************************/
+/*!
+    @brief  Read the pulse detection status
+*/
+/**************************************************************************/
+uint8_t Adafruit_MMA8451::getPulseStatus(void) {
+  return readRegister8(MMA8451_REG_PULSE_SRC);
 }
 
 #ifdef USE_SENSOR

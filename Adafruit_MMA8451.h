@@ -49,8 +49,14 @@
 #define MMA8451_REG_CTRL_REG2     0x2B
 #define MMA8451_REG_CTRL_REG4     0x2D
 #define MMA8451_REG_CTRL_REG5     0x2E
-
-
+#define MMA8451_REG_PULSE_CFG     0x21
+#define MMA8451_REG_PULSE_SRC     0x22
+#define MMA8451_REG_PULSE_THSX    0x23
+#define MMA8451_REG_PULSE_THSY    0x24
+#define MMA8451_REG_PULSE_THSZ    0x25
+#define MMA8451_REG_PULSE_TMLT    0x26
+#define MMA8451_REG_PULSE_LTCY    0x27
+#define MMA8451_REG_PULSE_WIND    0x28
 
 #define MMA8451_PL_PUF            0
 #define MMA8451_PL_PUB            1
@@ -63,11 +69,20 @@
 
 typedef enum
 {
+  MMA8451_PULSE_XSPEFE        = 0b000001,
+  MMA8451_PULSE_XDPEFE        = 0b000010,
+  MMA8451_PULSE_YSPEFE        = 0b000100,
+  MMA8451_PULSE_YDPEFE        = 0b001000,
+  MMA8451_PULSE_ZSPEFE        = 0b010000,
+  MMA8451_PULSE_ZDPEFE        = 0b100000
+} mma8451_pulse_t;
+
+typedef enum
+{
   MMA8451_RANGE_8_G           = 0b10,   // +/- 8g
   MMA8451_RANGE_4_G           = 0b01,   // +/- 4g
   MMA8451_RANGE_2_G           = 0b00    // +/- 2g (default value)
 } mma8451_range_t;
-
 
 /* Used with register 0x2A (MMA8451_REG_CTRL_REG1) to set bandwidth */
 typedef enum
@@ -83,8 +98,6 @@ typedef enum
 
   MMA8451_DATARATE_MASK       = 0b111
 } mma8451_dataRate_t;
-
-
 
 class Adafruit_MMA8451
 #ifdef USE_SENSOR
@@ -110,6 +123,9 @@ class Adafruit_MMA8451
   void getSensor(sensor_t *sensor);
 #endif
 
+  void cfgPulseDetection(void);
+  uint8_t getPulseStatus(void);
+  
   uint8_t getOrientation(void);
 
   int16_t x, y, z;
